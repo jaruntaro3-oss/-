@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Kanit", ui-sans-serif, system-ui, sans-serif;
+  --color-y2k-blue: #00e5ff;
+  --color-y2k-pink: #ff00de;
+  --color-dark-blue: #001233;
+  --color-deep-blue: #003566;
+  --color-dark-bg: #050505;
+  
+  /* Pastel Theme */
+  --color-pastel-pink: #ffc1cc;
+  --color-pastel-blue: #b6e3ff;
+  --color-pastel-green: #c1ffc1;
+  --color-pastel-purple: #e0b0ff;
+  --color-pastel-bg: #fdfdfd;
+  --color-pastel-text: #4a4a4a;
+}
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-white min-h-screen font-sans;
+    background-image: radial-gradient(theme('colors.deep-blue') 1px, transparent 1px);
+    background-size: 25px 25px;
+  }
+}
+
+.glass {
+  background: rgba(0, 53, 102, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.y2k-shadow {
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+}
+
+.y2k-text-shadow {
+  text-shadow: 0 0 10px var(--color-y2k-blue), 0 0 20px var(--color-deep-blue);
+}
