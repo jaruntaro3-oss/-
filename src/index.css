@@ -1,40 +1,118 @@
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;600&family=Prompt:wght@300;400;600&family=Inter:wght@400;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Kanit", ui-sans-serif, system-ui, sans-serif;
-  --color-y2k-blue: #00e5ff;
-  --color-y2k-pink: #ff00de;
-  --color-dark-blue: #001233;
-  --color-deep-blue: #003566;
-  --color-dark-bg: #050505;
+  --font-modern: "Prompt", sans-serif;
+  --font-geometric: "Inter", sans-serif;
   
-  /* Pastel Theme */
-  --color-pastel-pink: #ffc1cc;
-  --color-pastel-blue: #b6e3ff;
-  --color-pastel-green: #c1ffc1;
-  --color-pastel-purple: #e0b0ff;
-  --color-pastel-bg: #fdfdfd;
-  --color-pastel-text: #4a4a4a;
+  /* Cosmic Theme */
+  --color-cosmic-purple: #1A0B3B;
+  --color-cosmic-electric: #BF00FF;
+  --color-cosmic-aqua: #00FFFF;
+  --color-cosmic-cyan: #00E5FF;
+  --color-cosmic-deep: #0B051D;
 }
 
 @layer base {
   body {
-    @apply bg-dark-bg text-white min-h-screen font-sans;
-    background-image: radial-gradient(theme('colors.deep-blue') 1px, transparent 1px);
-    background-size: 25px 25px;
+    @apply bg-cosmic-deep text-white min-h-screen font-sans;
+    background-image: 
+      radial-gradient(circle at 50% 50%, rgba(26, 11, 59, 0.8) 0%, transparent 100%),
+      radial-gradient(theme('colors.cosmic-electric') 0.5px, transparent 0.5px);
+    background-size: 100% 100%, 40px 40px;
+    background-attachment: fixed;
   }
 }
 
-.glass {
-  background: rgba(0, 53, 102, 0.2);
-  backdrop-filter: blur(10px);
+.glass-cosmic {
+  background: rgba(26, 11, 59, 0.4);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(191, 0, 255, 0.2);
 }
 
-.y2k-shadow {
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+.cosmic-border-thick {
+  border-width: 4px;
+  border-color: rgba(191, 0, 255, 0.3);
 }
 
-.y2k-text-shadow {
-  text-shadow: 0 0 10px var(--color-y2k-blue), 0 0 20px var(--color-deep-blue);
+.cosmic-glow {
+  box-shadow: 0 0 20px rgba(191, 0, 255, 0.4);
+}
+
+.cosmic-card-glow {
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1);
+}
+
+.cosmic-input-glow:focus {
+  border-color: var(--color-cosmic-aqua);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.cosmic-button-glow:active, .cosmic-button-glow.active {
+  border-color: var(--color-cosmic-aqua);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+}
+
+.neon-cyan-glow {
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.6), 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.chromatic-aberration {
+  text-shadow: 2px 0 0 rgba(255,0,0,0.4), -2px 0 0 rgba(0,255,255,0.4);
+}
+
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.05;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.iridescent-selection {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(0,255,255,0.1), rgba(191,0,255,0.1));
+  border-color: rgba(255,255,255,0.4);
+}
+
+.holographic-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.holographic-shimmer::after {
+  content: "";
+  position: absolute;
+  top: -150%;
+  left: -150%;
+  width: 300%;
+  height: 300%;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 45%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 55%,
+    transparent 100%
+  );
+  transform: rotate(45deg);
+  transition: all 0.5s;
+  pointer-events: none;
+}
+
+.holographic-shimmer:hover::after {
+  top: -50%;
+  left: -50%;
+}
+
+.card-back-pattern {
+  background-color: #0b051d;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(191, 0, 255, 0.1) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0l2 8 8 2-8 2-2 8-2-8-8-2 8-2z' fill='%2300FFFF' fill-opacity='0.1'/%3E%3C/svg%3E");
+  background-size: 100% 100%, 20px 20px;
 }
