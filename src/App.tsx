@@ -351,30 +351,32 @@ export default function App() {
 
   const shareToStory = () => {
     if (selectedCards.length === 0) return;
-    const disclaimer = "\n\n*โปรดใช้วิจารณญาณในการดูไพ่ ไพ่ไม่สามารถกำหนดชีวิตเราได้ ให้เราใช้ชีวิตปกติได้เลย ดูเพื่อเป็นแนวทาง หรือดูเอาสนุก*";
-    const text = `🔮 REAL TAROT\n\nคำถาม: ${question}\n\nคำทำนาย:\n${aiReading}${disclaimer}`;
+    const text = `🔮 "${aiSummary}"\n\nดูคำทำนายของคุณได้ที่: ${window.location.href}`;
     navigator.clipboard.writeText(text);
-    alert('คัดลอกคำทำนาย AI แล้ว! นำไปวางใน Story ได้เลย ✨');
+    alert('คัดลอกคำทำนายสรุปและลิงก์แล้ว! นำไปวางแชร์ได้เลย ✨');
   };
 
   const downloadResultAsImage = async () => {
-    if (!captureRef.current) return;
+    if (!igStoryRef.current || selectedCards.length === 0) return;
     
     setIsDownloading(true);
     try {
       // Small delay to ensure everything is rendered
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      const dataUrl = await toPng(captureRef.current, {
+      const dataUrl = await toPng(igStoryRef.current, {
         cacheBust: true,
-        backgroundColor: '#1A0B3B', 
+        width: 1080,
+        height: 1920,
+        pixelRatio: 1,
         style: {
-          borderRadius: '0', 
+          transform: 'scale(1)',
+          transformOrigin: 'top left',
         }
       });
       
       const link = document.createElement('a');
-      link.download = `cosmic-tarot-${Date.now()}.png`;
+      link.download = `real-tarot-story-${Date.now()}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -1007,11 +1009,16 @@ export default function App() {
                 'h-[750px]'
               }`}>
                 {selectedCards.length === 1 && (
-                  <div className="w-[580px] aspect-[2/3] rounded-[40px] overflow-hidden border-8 border-cosmic-aqua/50 shadow-[0_0_80px_rgba(0,255,255,0.4)]">
-                    <img src={selectedCards[0].img} alt={selectedCards[0].name} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-                    <div className="absolute bottom-10 left-0 right-0 text-center text-white font-bold text-4xl drop-shadow-lg px-4">
-                      {selectedCards[0].name}
+                  <div 
+                    className="relative"
+                    style={{ filter: 'drop-shadow(0 0 20px rgba(0,0,0,0.8)) drop-shadow(0 0 50px rgba(0,255,255,0.4))' }}
+                  >
+                    <div className="w-[580px] aspect-[2/3] rounded-[40px] overflow-hidden border-8 border-cosmic-aqua/50">
+                      <img src={selectedCards[0].img} alt={selectedCards[0].name} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+                      <div className="absolute bottom-10 left-0 right-0 text-center text-white font-bold text-4xl drop-shadow-lg px-4">
+                        {selectedCards[0].name}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1021,10 +1028,11 @@ export default function App() {
                     {selectedCards.map((card, idx) => (
                       <div 
                         key={idx}
-                        className="relative w-[380px] aspect-[2/3] rounded-[30px] overflow-hidden border-4 border-cosmic-aqua/40 shadow-[0_0_40px_rgba(0,255,255,0.2)] transition-transform"
+                        className="relative w-[380px] aspect-[2/3] rounded-[30px] overflow-hidden border-4 border-cosmic-aqua/40 transition-transform"
                         style={{ 
                           transform: `rotate(${(idx - 1) * 8}deg) translateY(${Math.abs(idx - 1) * 40}px)`,
-                          zIndex: idx === 1 ? 20 : 10
+                          zIndex: idx === 1 ? 20 : 10,
+                          filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.6)) drop-shadow(0 0 30px rgba(0,255,255,0.2))'
                         }}
                       >
                         <img src={card.img} alt={card.name} className="w-full h-full object-cover" />
@@ -1044,10 +1052,11 @@ export default function App() {
                       {selectedCards.slice(0, 3).map((card, idx) => (
                         <div 
                           key={idx}
-                          className="relative w-[320px] aspect-[2/3] rounded-[25px] overflow-hidden border-4 border-cosmic-aqua/40 shadow-[0_0_30px_rgba(0,255,255,0.2)]"
+                          className="relative w-[320px] aspect-[2/3] rounded-[25px] overflow-hidden border-4 border-cosmic-aqua/40"
                           style={{ 
                             transform: `rotate(${(idx - 1) * 6}deg) translateY(${Math.abs(idx - 1) * 20}px)`,
-                            zIndex: idx === 1 ? 20 : 10
+                            zIndex: idx === 1 ? 20 : 10,
+                            filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.6)) drop-shadow(0 0 20px rgba(0,255,255,0.2))'
                           }}
                         >
                           <img src={card.img} alt={card.name} className="w-full h-full object-cover" />
@@ -1060,7 +1069,8 @@ export default function App() {
                       {selectedCards.slice(3, 5).map((card, idx) => (
                         <div 
                           key={idx}
-                          className="relative w-[320px] aspect-[2/3] rounded-[25px] overflow-hidden border-4 border-cosmic-aqua/40 shadow-[0_0_30px_rgba(0,255,255,0.2)]"
+                          className="relative w-[320px] aspect-[2/3] rounded-[25px] overflow-hidden border-4 border-cosmic-aqua/40"
+                          style={{ filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.6)) drop-shadow(0 0 20px rgba(0,255,255,0.2))' }}
                         >
                           <img src={card.img} alt={card.name} className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
