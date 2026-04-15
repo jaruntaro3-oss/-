@@ -79,6 +79,44 @@
   border-color: rgba(255,255,255,0.4);
 }
 
+.prediction-text {
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.result-card, .glass-cosmic, .cosmic-border-thick, .prediction-text {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 1024px) {
+  body, p, span, div, li { font-size: 15px !important; line-height: 1.5 !important; }
+  h1, .text-3xl, .text-4xl, .text-5xl, .text-6xl, .text-7xl, .text-8xl { font-size: 22px !important; }
+  h2, .text-2xl { font-size: 20px !important; }
+  .glass-cosmic {
+    max-width: 90% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body, p, span, div, li { font-size: 14px !important; line-height: 1.4 !important; }
+  h1, .text-3xl, .text-4xl, .text-5xl, .text-6xl, .text-7xl, .text-8xl { font-size: 20px !important; }
+  h2, .text-2xl { font-size: 18px !important; }
+  .container, .card, .p-8, .p-6, .md\:p-10, .glass-cosmic { padding: 16px !important; } /* Reduce huge paddings */
+  .glass-cosmic {
+    max-width: 92% !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .prediction-text {
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+}
+
 .holographic-shimmer {
   position: relative;
   overflow: hidden;

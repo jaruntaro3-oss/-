@@ -17,7 +17,7 @@ interface TarotCard {
   emoji: string;
   img: string;
   meaning: string;
-  category: 'LOVE' | 'WORK' | 'GENERAL';
+  category: 'LOVE' | 'WORK' | 'GENERAL' | 'FINANCE' | 'HEALTH';
 }
 
 const TAROT_DATA: TarotCard[] = [
@@ -94,14 +94,14 @@ const TAROT_DATA: TarotCard[] = [
     emoji: "💰", 
     img: "https://upload.wikimedia.org/wikipedia/commons/2/27/Pents01.jpg",
     meaning: "โอกาสทางการเงินก้อนใหญ่มาถึงแล้ว! การเริ่มต้นธุรกิจหรือการลงทุนจะให้ผลตอบแทนดีเยี่ยม",
-    category: 'WORK'
+    category: 'FINANCE'
   },
   { 
     name: "Ten of Pentacles (10 เหรียญ)", 
     emoji: "🏦", 
     img: "https://upload.wikimedia.org/wikipedia/commons/d/de/Pents10.jpg",
     meaning: "ความมั่งคั่งร่ำรวย ความมั่นคงในระยะยาว มีเกณฑ์ได้รับมรดกหรือเงินก้อนโตจากครอบครัว",
-    category: 'WORK'
+    category: 'FINANCE'
   },
   { 
     name: "Ace of Wands (1 ไม้เท้า)", 
@@ -116,16 +116,32 @@ const TAROT_DATA: TarotCard[] = [
     img: "https://upload.wikimedia.org/wikipedia/commons/6/6b/Wands08.jpg",
     meaning: "ทุกอย่างจะดำเนินไปอย่างรวดเร็ว! ข่าวดีเรื่องงานกำลังเดินทางมาถึงคุณแบบติดสปีด",
     category: 'WORK'
+  },
+
+  // HEALTH
+  {
+    name: "Temperance (ความพอดี)",
+    emoji: "⚖️",
+    img: "https://upload.wikimedia.org/wikipedia/commons/f/f8/RWS_Tarot_14_Temperance.jpg",
+    meaning: "สุขภาพกำลังฟื้นฟูครับ เน้นความสมดุลและการพักผ่อนที่เพียงพอจะดีขึ้นมาก",
+    category: 'HEALTH'
+  },
+  {
+    name: "Strength (ความแข็งแกร่ง)",
+    emoji: "🦁",
+    img: "https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg",
+    meaning: "ร่างกายแข็งแรงมาก! มีพลังในการต่อสู้กับโรคภัยไข้เจ็บ หรือกำลังใจดีเยี่ยมครับ",
+    category: 'HEALTH'
   }
 ];
 
 type ViewState = 'HOME' | 'READING' | 'ABOUT';
-type Topic = 'LOVE' | 'WORK' | 'GENERAL';
+type Topic = 'LOVE' | 'WORK' | 'GENERAL' | 'FINANCE' | 'HEALTH';
 type ReadingStyle = 'GENZ' | 'NORMAL';
 
 function CrystalOrb() {
   return (
-    <div className="relative w-64 h-64 md:w-80 md:h-80 mx-auto mb-8">
+    <div className="relative w-48 h-48 md:w-64 md:h-64 mx-auto mb-6">
       {/* Chromatic Aberration Effect Layers */}
       <div className="absolute inset-0 rounded-full bg-cosmic-purple/20 blur-xl animate-pulse" />
       <div className="absolute inset-0 rounded-full border-4 border-red-500/10 scale-105 blur-[2px]" />
@@ -146,7 +162,7 @@ function CrystalOrb() {
           transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
           className="absolute inset-0 flex items-center justify-center text-cosmic-aqua"
         >
-          <Sparkles size={120} className="drop-shadow-[0_0_15px_rgba(0,255,255,0.8)]" />
+          <Sparkles size={80} className="drop-shadow-[0_0_15px_rgba(0,255,255,0.8)]" />
         </motion.div>
       </div>
       
@@ -182,7 +198,7 @@ function TarotCardComponent({ card, isBack = false, onClick, className = "", del
           <div className="w-full h-full card-back-pattern flex items-center justify-center p-4">
             <div className="w-full h-full border border-cosmic-aqua/20 rounded-lg flex items-center justify-center relative">
               <div className="absolute inset-0 bg-radial-gradient from-cosmic-electric/10 to-transparent" />
-              <Sparkles className="text-cosmic-aqua/40 animate-pulse" size={32} />
+              <Sparkles className="text-cosmic-aqua/40 animate-pulse" size={24} />
             </div>
           </div>
         ) : (
@@ -207,7 +223,7 @@ function TarotCardComponent({ card, isBack = false, onClick, className = "", del
 export default function App() {
   const [view, setView] = useState<ViewState>('HOME');
   const [topic, setTopic] = useState<Topic>('GENERAL');
-  const [readingStyle, setReadingStyle] = useState<ReadingStyle>('GENZ');
+  const [readingStyle, setReadingStyle] = useState<ReadingStyle>('NORMAL');
   const [cardCount, setCardCount] = useState<number>(1);
   const [question, setQuestion] = useState('');
   const [dob, setDob] = useState('');
@@ -221,6 +237,8 @@ export default function App() {
   const [copyStatus, setCopyStatus] = useState('คัดลอกลิงก์เว็บ');
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSharingIG, setIsSharingIG] = useState(false);
+  const [includePredictionInShare, setIncludePredictionInShare] = useState(true);
+  const [includeQuestionInShare, setIncludeQuestionInShare] = useState(false);
   const [viewingCard, setViewingCard] = useState<TarotCard | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
@@ -247,7 +265,7 @@ export default function App() {
     try {
       const model = "gemini-3-flash-preview";
       const cardsList = drawn.map((c, i) => `ใบที่ ${i+1}: ${c.name}`).join(', ');
-      const topicText = topic === 'LOVE' ? 'ความรักและความรู้สึก' : topic === 'WORK' ? 'การงานและการเงิน' : 'ทั่วไป';
+      const topicText = topic === 'LOVE' ? 'ความรักและความรู้สึก' : topic === 'WORK' ? 'การงาน' : topic === 'FINANCE' ? 'การเงินและโชคลาภ' : topic === 'HEALTH' ? 'สุขภาพและร่างกาย' : 'ทั่วไป';
       const dobInfo = dob ? `วันเดือนปีเกิดของผู้ถาม: ${dob}` : 'ไม่ได้ระบุวันเกิด';
       
       const stylePrompt = readingStyle === 'GENZ' 
@@ -277,10 +295,15 @@ export default function App() {
 
       // Generate a punchy summary for IG Story
       try {
-        const summaryPrompt = `จากคำทำนายนี้: "${fullReading}" 
-        ช่วยสรุปเป็นประโยคสั้นๆ เพียงประโยคเดียวที่ "จึ้ง" และ "โดนใจ" (Punchline) สำหรับแชร์ลง Instagram Story 
-        (เช่น "ความรักกำลังพุ่งชน!" หรือ "เงินก้อนโตเตรียมเข้าบัญชี!") 
-        ตอบเป็นภาษาไทยสั้นๆ ไม่ต้องมีเครื่องหมายคำพูด`;
+        const summaryPrompt = `จากคำทำนายนี้: "${fullReading}" และคำถามของผู้ถามคือ "${question}"
+        ช่วยสรุปเป็นข้อความสั้นๆ 2-3 ประโยค สำหรับแชร์ลง Instagram Story โดยมีโครงสร้างดังนี้:
+        1. สถานการณ์ปัจจุบัน (อ้างอิงจากไพ่ที่ได้)
+        2. คำตอบโดยตรงสำหรับคำถามของผู้ถาม (ต้องระบุถึงหัวข้อที่เขาถาม เช่น ความรัก, งาน)
+        3. คำแนะนำหรือผลลัพธ์สุดท้าย
+        
+        ตัวอย่าง: "สถานการณ์ตอนนี้คุณกำลังเจออุปสรรคตามไพ่ The Moon แต่เรื่องงานของคุณกำลังจะดีขึ้นในเร็วๆ นี้ ขอให้ตั้งใจและมุ่งมั่นต่อไปครับ"
+        
+        ตอบเป็นภาษาไทยที่กระชับ จึ้ง และโดนใจ ไม่ต้องมีเครื่องหมายคำพูด และไม่ต้องยาวเกินไป (ไม่เกิน 150 ตัวอักษร)`;
         
         const summaryResponse = await ai.models.generateContent({
           model,
@@ -370,34 +393,66 @@ export default function App() {
       // Ensure fonts and images are loaded
       await new Promise(resolve => setTimeout(resolve, 800));
       
+      // Use toPng first to get the dataUrl, or toJpeg for quality control
+      // JPEG is better for photos and reduces file size significantly
       const dataUrl = await toPng(igStoryRef.current, {
         cacheBust: true,
         width: 1080,
         height: 1920,
+        pixelRatio: 1, // Keep it standard to avoid massive files
         style: {
           transform: 'scale(1)',
           transformOrigin: 'top left',
         }
       });
 
-      // Convert dataUrl to File object for Web Share API
-      const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], `real-tarot-story-${Date.now()}.png`, { type: 'image/png' });
+      // Convert to Blob with quality control using a canvas to ensure compatibility
+      const img = new Image();
+      img.src = dataUrl;
+      await new Promise(resolve => img.onload = resolve);
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Could not get canvas context');
+      ctx.drawImage(img, 0, 0);
+      
+      const blob = await new Promise<Blob | null>(resolve => 
+        canvas.toBlob(resolve, 'image/jpeg', 0.8)
+      );
 
+      if (!blob) throw new Error('Failed to create blob');
+      
+      const file = new File([blob], `real-tarot-story-${Date.now()}.jpg`, { type: 'image/jpeg' });
+
+      // Check if Web Share API is supported and can share the file
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'Real Tarot Prediction',
-          text: 'สัมผัสคำทำนายจากจิตจักรวาล ✨',
-        });
-      } else {
-        // Fallback: Download
-        const link = document.createElement('a');
-        link.download = `real-tarot-story-${Date.now()}.png`;
-        link.href = dataUrl;
-        link.click();
-        alert('บันทึกรูปภาพสำหรับ Instagram Story แล้ว! คุณสามารถนำไปโพสต์ได้เลย ✨');
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'Real Tarot Prediction',
+            text: 'สัมผัสคำทำนายจากจิตจักรวาล ✨',
+          });
+          return; // Success!
+        } catch (shareErr) {
+          // If user cancelled, don't necessarily trigger fallback unless it's a real error
+          if ((shareErr as Error).name === 'AbortError') return;
+          console.error('Share failed:', shareErr);
+        }
       }
+
+      // Fallback: Download
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = `real-tarot-story-${Date.now()}.jpg`;
+      link.href = downloadUrl;
+      link.click();
+      URL.revokeObjectURL(downloadUrl);
+      
+      // Friendly notification
+      alert('บันทึกรูปภาพลงเครื่องแล้ว! ✨\nคุณสามารถนำไปโพสต์ลง Instagram Story ได้เลยครับ');
+      
     } catch (err) {
       console.error('IG Story Share Error:', err);
       alert('ไม่สามารถแชร์ได้ในขณะนี้ กรุณาลองใหม่อีกครั้งครับ');
@@ -427,32 +482,32 @@ export default function App() {
                   >
                     <CrystalOrb />
 
-                    <div className="space-y-4">
-                      <h1 className="text-6xl md:text-8xl font-bold uppercase tracking-[0.15em] font-geometric neon-cyan-glow">
+                    <div className="space-y-3">
+                      <h1 className="text-4xl md:text-6xl font-bold uppercase tracking-[0.15em] font-geometric neon-cyan-glow">
                         REAL TAROT
                       </h1>
-                      <p className="text-2xl md:text-3xl font-light flex items-center justify-center gap-2 font-modern text-white">
-                        <Sparkles className="text-cosmic-aqua" size={16} />
+                      <p className="text-lg md:text-xl font-light flex items-center justify-center gap-2 font-modern text-white">
+                        <Sparkles className="text-cosmic-aqua" size={14} />
                         สัมผัสคำทำนายจากจิตจักรวาล
-                        <Sparkles className="text-cosmic-aqua" size={16} />
+                        <Sparkles className="text-cosmic-aqua" size={14} />
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 w-full max-w-sm">
+                    <div className="grid grid-cols-1 gap-4 w-full max-w-[280px]">
                       <button
                         onClick={() => setView('READING')}
-                        className="group relative py-6 px-8 text-3xl font-bold transition-all active:scale-95 flex items-center justify-center gap-4 overflow-hidden bg-cosmic-electric/20 text-white border border-cosmic-electric/50 backdrop-blur-md hover:bg-cosmic-electric/40 cosmic-glow rounded-full"
+                        className="group relative py-4 px-6 text-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-3 overflow-hidden bg-cosmic-electric/20 text-white border border-cosmic-electric/50 backdrop-blur-md hover:bg-cosmic-electric/40 cosmic-glow rounded-full btn-mobile-small"
                       >
-                        <Sparkles className="text-cosmic-aqua" />
+                        <Sparkles className="text-cosmic-aqua" size={20} />
                         เริ่มดูดวง
                         <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                       </button>
 
                       <button
                         onClick={() => setView('ABOUT')}
-                        className="py-4 px-8 text-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-3 bg-white/5 border border-white/20 text-white backdrop-blur-sm hover:bg-white/10 rounded-full"
+                        className="py-3 px-6 text-lg font-bold transition-all active:scale-95 flex items-center justify-center gap-2 bg-white/5 border border-white/20 text-white backdrop-blur-sm hover:bg-white/10 rounded-full btn-mobile-small"
                       >
-                        <Info />
+                        <Info size={18} />
                         วิธีใช้งาน
                       </button>
                     </div>
@@ -491,51 +546,51 @@ export default function App() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="space-y-8"
                 >
-                  <div className="rounded-3xl p-6 space-y-6 glass-cosmic cosmic-border-thick cosmic-glow">
+                  <div className="rounded-2xl p-5 space-y-5 glass-cosmic cosmic-border-thick cosmic-glow">
                     <div>
-                      <label className="block text-lg mb-2 font-bold font-modern text-cosmic-aqua">
+                      <label className="block text-sm mb-1.5 font-bold font-modern text-cosmic-aqua">
                         1. เลือกหัวข้อที่คุณต้องการถาม:
                       </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {(['GENERAL', 'LOVE', 'WORK'] as Topic[]).map((t) => (
+                      <div className="grid grid-cols-5 gap-1">
+                        {(['GENERAL', 'LOVE', 'WORK', 'FINANCE', 'HEALTH'] as Topic[]).map((t) => (
                           <button
                             key={t}
                             onClick={() => setTopic(t)}
-                            className={`py-2 px-1 rounded-xl text-sm font-bold transition-all ${
+                            className={`py-1.5 px-0.5 rounded-lg text-[10px] font-bold transition-all ${
                               topic === t 
                                 ? 'iridescent-selection text-white scale-105 active cosmic-button-glow'
                                 : 'bg-white/5 text-white/40 hover:bg-white/10 border border-white/5'
                             }`}
                           >
-                            {t === 'GENERAL' ? 'ทั่วไป' : t === 'LOVE' ? 'ความรัก' : 'การงาน'}
+                            {t === 'GENERAL' ? 'ทั่วไป' : t === 'LOVE' ? 'ความรัก' : t === 'WORK' ? 'การงาน' : t === 'FINANCE' ? 'การเงิน' : 'สุขภาพ'}
                           </button>
                         ))}
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-lg mb-2 font-bold font-modern text-cosmic-aqua">
+                      <label className="block text-sm mb-1.5 font-bold font-modern text-cosmic-aqua">
                         2. เลือกสไตล์การทำนาย:
                       </label>
                       <div className="grid grid-cols-2 gap-2">
-                        {(['GENZ', 'NORMAL'] as ReadingStyle[]).map((s) => (
+                        {(['NORMAL', 'GENZ'] as ReadingStyle[]).map((s) => (
                           <button
                             key={s}
                             onClick={() => setReadingStyle(s)}
-                            className={`py-2 px-4 rounded-xl text-sm font-bold transition-all ${
+                            className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all ${
                               readingStyle === s 
                                 ? 'iridescent-selection text-white scale-105 active cosmic-button-glow'
                                 : 'bg-white/5 text-white/40 hover:bg-white/10 border border-white/5'
                             }`}
                           >
-                            {s === 'GENZ' ? 'วัยรุ่น (ชาย)' : 'ภาษาทางการ/ปกติ'}
+                            {s === 'NORMAL' ? 'ภาษาทางการ/ปกติ' : 'GenZ (ชาย)'}
                           </button>
                         ))}
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-lg mb-2 font-bold font-modern text-cosmic-aqua">
+                      <label className="block text-sm mb-1.5 font-bold font-modern text-cosmic-aqua">
                         3. เลือกจำนวนไพ่:
                       </label>
                       <div className="grid grid-cols-3 gap-2">
@@ -543,7 +598,7 @@ export default function App() {
                           <button
                             key={n}
                             onClick={() => setCardCount(n)}
-                            className={`py-2 px-4 rounded-xl text-lg font-bold transition-all ${
+                            className={`py-1.5 px-2 rounded-lg text-sm font-bold transition-all ${
                               cardCount === n 
                                 ? 'iridescent-selection text-white scale-105 active cosmic-button-glow'
                                 : 'bg-white/5 text-white/40 hover:bg-white/10 border border-white/5'
@@ -556,29 +611,29 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="block text-lg mb-2 font-bold font-modern text-cosmic-aqua">
+                      <label className="block text-sm mb-1.5 font-bold font-modern text-cosmic-aqua">
                         4. วันเดือนปีเกิด (ไม่บังคับ ✨):
                       </label>
                       <input
                         type="date"
                         value={dob}
                         onChange={(e) => setDob(e.target.value)}
-                        className="w-full border-b-2 p-4 rounded-xl outline-none transition-all text-lg appearance-none bg-white/5 border-white/10 text-white cosmic-input-glow"
+                        className="w-full border-b p-3 rounded-lg outline-none transition-all text-sm appearance-none bg-white/5 border-white/10 text-white cosmic-input-glow"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-lg mb-2 font-bold font-modern text-cosmic-aqua">
+                      <label className="block text-sm mb-1.5 font-bold font-modern text-cosmic-aqua">
                         5. พิมพ์คำถามของคุณ:
                       </label>
-                      <input
-                        type="text"
+                      <textarea
                         value={question}
                         onChange={(e) => setQuestion(e.target.value)}
                         placeholder="เช่น ช่วงนี้จะรวยไหม?, เขาคิดยังไงกับเรา?"
-                        className="w-full border-b-2 p-4 rounded-xl outline-none transition-all text-lg bg-white/5 border-white/10 text-white cosmic-input-glow"
+                        rows={2}
+                        className="w-full border-b p-3 rounded-lg outline-none transition-all text-sm bg-white/5 border-white/10 text-white cosmic-input-glow resize-none placeholder:text-white/20 placeholder:text-xs"
                       />
-                      {error && <p className="mt-2 text-sm font-bold text-red-400">{error}</p>}
+                      {error && <p className="mt-2 text-xs font-bold text-red-400">{error}</p>}
                     </div>
                   </div>
 
@@ -607,33 +662,33 @@ export default function App() {
                   ref={resultRef}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="rounded-[40px] p-8 text-center space-y-6 overflow-hidden glass-cosmic cosmic-border-thick cosmic-glow"
+                  className="rounded-3xl p-6 text-center space-y-6 overflow-hidden glass-cosmic cosmic-border-thick cosmic-glow"
                 >
                   {/* Capture Area */}
-                  <div ref={captureRef} className="space-y-6 p-4 rounded-3xl bg-cosmic-purple/40">
-                    <div className="p-4 rounded-2xl text-lg bg-white/5 border border-white/10">
-                      หัวข้อ: <span className="font-bold text-cosmic-electric">{topic === 'LOVE' ? 'ความรัก' : topic === 'WORK' ? 'การงาน/การเงิน' : 'ทั่วไป'}</span> | 
-                      คำถาม: <span className="font-bold italic text-cosmic-aqua">"{question}"</span>
-                    </div>
+                    <div ref={captureRef} className="space-y-6 p-4 md:p-6 rounded-2xl bg-cosmic-purple/40">
+                      <div className="p-4 rounded-xl text-sm md:text-base bg-white/5 border border-white/10">
+                        หัวข้อ: <span className="font-bold text-cosmic-electric">{topic === 'LOVE' ? 'ความรัก' : topic === 'WORK' ? 'การงาน' : topic === 'FINANCE' ? 'การเงิน' : topic === 'HEALTH' ? 'สุขภาพ' : 'ทั่วไป'}</span> | 
+                        คำถาม: <span className="font-bold italic text-cosmic-aqua">"{question}"</span>
+                      </div>
 
-                    <div className={`grid gap-6 ${cardCount === 1 ? 'grid-cols-1' : cardCount === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-5'}`}>
-                      {selectedCards.map((card, index) => (
-                        <TarotCardComponent
-                          key={index}
-                          card={card}
-                          delay={index * 0.2}
-                          onClick={() => setViewingCard(card)}
-                          className="w-full max-w-[150px] mx-auto"
-                        />
-                      ))}
-                    </div>
+                      <div className={`grid gap-4 ${cardCount === 1 ? 'grid-cols-1' : cardCount === 3 ? 'grid-cols-3' : 'grid-cols-3 sm:grid-cols-5'}`}>
+                        {selectedCards.map((card, index) => (
+                          <TarotCardComponent
+                            key={index}
+                            card={card}
+                            delay={index * 0.2}
+                            onClick={() => setViewingCard(card)}
+                            className="w-full max-w-[110px] mx-auto"
+                          />
+                        ))}
+                      </div>
 
-                    <div className="space-y-4 text-left">
-                      <div className="p-6 rounded-3xl text-lg leading-relaxed border-l-[10px] shadow-xl bg-white/5 text-white border-cosmic-electric backdrop-blur-md">
-                        <div className="flex items-center gap-2 mb-3 font-bold uppercase tracking-wider text-cosmic-electric">
-                          <BrainCircuit size={24} />
-                          AI วิเคราะห์ดวงชะตา
-                        </div>
+                      <div className="space-y-4 text-left">
+                        <div className="p-6 md:p-8 rounded-2xl border-l-[6px] shadow-xl bg-white/5 text-white border-cosmic-electric backdrop-blur-md prediction-text result-card">
+                          <div className="flex items-center gap-2 mb-4 font-bold uppercase tracking-wider text-cosmic-electric text-lg prediction-header">
+                            <BrainCircuit size={24} />
+                            AI วิเคราะห์ดวงชะตา
+                          </div>
                         {isGenerating ? (
                           <div className="flex flex-col items-center justify-center py-12 space-y-6 relative overflow-hidden">
                             {/* Floating Sparkles */}
@@ -761,7 +816,33 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-3 pt-4">
+                  <div className="grid grid-cols-1 gap-2 pt-4">
+                    <div className="flex items-center justify-between py-3 px-4 rounded-2xl bg-white/5 border border-white/10">
+                      <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">แสดงคำทำนายสั้น</span>
+                      <button 
+                        onClick={() => setIncludePredictionInShare(!includePredictionInShare)}
+                        className={`relative w-10 h-5 rounded-full transition-colors duration-300 ${includePredictionInShare ? 'bg-cosmic-electric' : 'bg-white/20'}`}
+                      >
+                        <motion.div 
+                          animate={{ x: includePredictionInShare ? 20 : 2 }}
+                          className="absolute top-1 left-0 w-3 h-3 bg-white rounded-full shadow-md"
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between py-3 px-4 rounded-2xl bg-white/5 border border-white/10 mb-1">
+                      <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">แสดงคำถามของฉัน</span>
+                      <button 
+                        onClick={() => setIncludeQuestionInShare(!includeQuestionInShare)}
+                        className={`relative w-10 h-5 rounded-full transition-colors duration-300 ${includeQuestionInShare ? 'bg-cosmic-aqua' : 'bg-white/20'}`}
+                      >
+                        <motion.div 
+                          animate={{ x: includeQuestionInShare ? 20 : 2 }}
+                          className="absolute top-1 left-0 w-3 h-3 bg-white rounded-full shadow-md"
+                        />
+                      </button>
+                    </div>
+
                     <button
                       onClick={shareToInstagramStory}
                       disabled={isSharingIG || isGenerating}
@@ -916,34 +997,104 @@ export default function App() {
             <p className="text-3xl font-light tracking-widest opacity-80">สัมผัสคำทำนายจากจิตจักรวาล</p>
           </div>
 
-          {/* Main Card */}
+          {/* Card Spread Area */}
           {selectedCards.length > 0 && (
-            <div className="relative z-10 flex flex-col items-center space-y-12">
-              <div className="relative w-[500px] aspect-[2/3] rounded-[40px] overflow-hidden border-8 border-cosmic-aqua/50 shadow-[0_0_80px_rgba(0,255,255,0.4)]">
-                <img 
-                  src={selectedCards[0].img} 
-                  alt={selectedCards[0].name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+            <div className="relative z-10 flex flex-col items-center justify-center flex-1 w-full py-8">
+              {/* Cards Container */}
+              <div className={`relative flex items-center justify-center w-full ${
+                selectedCards.length === 1 ? 'h-[800px]' : 
+                selectedCards.length === 3 ? 'h-[600px]' : 
+                'h-[750px]'
+              }`}>
+                {selectedCards.length === 1 && (
+                  <div className="w-[580px] aspect-[2/3] rounded-[40px] overflow-hidden border-8 border-cosmic-aqua/50 shadow-[0_0_80px_rgba(0,255,255,0.4)]">
+                    <img src={selectedCards[0].img} alt={selectedCards[0].name} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute bottom-10 left-0 right-0 text-center text-white font-bold text-4xl drop-shadow-lg px-4">
+                      {selectedCards[0].name}
+                    </div>
+                  </div>
+                )}
+
+                {selectedCards.length === 3 && (
+                  <div className="flex items-center justify-center -space-x-24">
+                    {selectedCards.map((card, idx) => (
+                      <div 
+                        key={idx}
+                        className="relative w-[380px] aspect-[2/3] rounded-[30px] overflow-hidden border-4 border-cosmic-aqua/40 shadow-[0_0_40px_rgba(0,255,255,0.2)] transition-transform"
+                        style={{ 
+                          transform: `rotate(${(idx - 1) * 8}deg) translateY(${Math.abs(idx - 1) * 40}px)`,
+                          zIndex: idx === 1 ? 20 : 10
+                        }}
+                      >
+                        <img src={card.img} alt={card.name} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="absolute bottom-6 left-0 right-0 text-center text-white font-bold text-xl drop-shadow-lg px-2">
+                          {card.name}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {selectedCards.length === 5 && (
+                  <div className="flex flex-col items-center gap-8">
+                    {/* Top Row (3 cards) */}
+                    <div className="flex items-center justify-center -space-x-20">
+                      {selectedCards.slice(0, 3).map((card, idx) => (
+                        <div 
+                          key={idx}
+                          className="relative w-[320px] aspect-[2/3] rounded-[25px] overflow-hidden border-4 border-cosmic-aqua/40 shadow-[0_0_30px_rgba(0,255,255,0.2)]"
+                          style={{ 
+                            transform: `rotate(${(idx - 1) * 6}deg) translateY(${Math.abs(idx - 1) * 20}px)`,
+                            zIndex: idx === 1 ? 20 : 10
+                          }}
+                        >
+                          <img src={card.img} alt={card.name} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+                        </div>
+                      ))}
+                    </div>
+                    {/* Bottom Row (2 cards) */}
+                    <div className="flex items-center justify-center gap-12">
+                      {selectedCards.slice(3, 5).map((card, idx) => (
+                        <div 
+                          key={idx}
+                          className="relative w-[320px] aspect-[2/3] rounded-[25px] overflow-hidden border-4 border-cosmic-aqua/40 shadow-[0_0_30px_rgba(0,255,255,0.2)]"
+                        >
+                          <img src={card.img} alt={card.name} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="text-center space-y-4">
-                <h2 className="text-6xl font-bold uppercase text-cosmic-aqua drop-shadow-[0_0_15px_rgba(0,255,255,0.8)]">
-                  {selectedCards[0].name}
-                </h2>
-                <div className="h-2 w-48 bg-linear-to-r from-transparent via-cosmic-electric to-transparent mx-auto" />
-              </div>
+
+              {/* Question Section (Conditional) */}
+              {includeQuestionInShare && question && (
+                <div className="mt-12 w-full px-16 text-center">
+                  <div className="inline-block px-8 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+                    <p className="text-2xl font-bold text-cosmic-aqua uppercase tracking-widest mb-2 opacity-60">คำถามของคุณ</p>
+                    <p className="text-4xl font-medium text-white italic leading-relaxed">
+                      "{question}"
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Punchy Summary */}
-          <div className="w-full text-center z-10 px-8">
-            <div className="p-12 rounded-[50px] bg-white/5 border-2 border-white/10 backdrop-blur-xl shadow-2xl">
-              <p className="text-5xl font-bold leading-tight text-white drop-shadow-lg">
-                "{aiSummary}"
-              </p>
+          {/* Punchy Summary (Conditional) */}
+          {includePredictionInShare && aiSummary && (
+            <div className="w-full text-center z-10 px-16 mb-20">
+              <div className="p-10 rounded-[40px] bg-linear-to-br from-cosmic-purple/90 to-black/90 border-2 border-cosmic-electric/30 backdrop-blur-xl shadow-[0_0_50px_rgba(191,0,255,0.2)]">
+                <p className="text-[38px] leading-[1.5] text-white font-modern drop-shadow-[0_0_15px_rgba(0,255,255,0.3)]">
+                  "{aiSummary}"
+                </p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Footer with QR and Watermark */}
           <div className="w-full flex items-end justify-between z-10">
